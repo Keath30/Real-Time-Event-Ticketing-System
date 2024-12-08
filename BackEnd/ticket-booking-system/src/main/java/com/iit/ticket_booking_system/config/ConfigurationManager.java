@@ -10,9 +10,9 @@ import java.nio.file.Paths;
 
 public class ConfigurationManager {
 
-    private  final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
-    public  void saveConfiguration(Configuration configuration, String file){
+    public static void saveConfiguration(Configuration configuration, String file){
         try(FileWriter writer = new FileWriter(file)){
             gson.toJson(configuration, writer);
             System.out.println("Configuration saved to: " + file);
@@ -22,13 +22,8 @@ public class ConfigurationManager {
         }
     }
 
-    public  void saveConfigurationToTextFile(Configuration config, String textFile) {
-        String content = "Total Tickets: " + config.getTotalTickets() +
-                "\nTicket Per Release: " + config.getTicketsPerRelease() +
-                "\nTicket Release Interval: " + config.getReleaseInterval() +
-                "\nCustomer Retrieval Interval: " + config.getRetrievalInterval() +
-                "\nCustomer Ticket Quantity: " + config.getTicketQuantity() +
-                "\nMaximum Ticket Capacity: " + config.getMaxTicketCapacity() + "\n";
+    public static void saveConfigurationToTextFile(Configuration config, String textFile) {
+        String content = "Maximum Ticket Capacity: " + config.getMaxTicketCapacity() + "\n";
 
         try {
             Files.write(Paths.get(textFile), content.getBytes());
@@ -38,7 +33,7 @@ public class ConfigurationManager {
         }
     }
 
-    public Configuration loadConfiguration(String file){
+    public static Configuration loadConfiguration(String file){
         try (FileReader reader = new FileReader(file)) {
             return gson.fromJson(reader, Configuration.class);
 

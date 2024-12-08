@@ -24,8 +24,8 @@ public class TicketPool {
 
     public synchronized void addTickets(Ticket ticket)  {
         while (tickets.size() >= maxCapacity){
-            System.out.println("Ticket pool is full\n");
             try {
+                System.out.println("Ticket pool is full\n");
                 wait();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -33,14 +33,13 @@ public class TicketPool {
         }
         tickets.add(ticket);
         totalTicketsAdded++;
-        System.out.println("Number of Tickets in the pool: " + getCurrentSize() + "\n");
         notifyAll();
     }
 
     public synchronized Ticket buyTicket() {
         while (tickets.isEmpty()){
             try {
-                System.out.println("No tickets available.");
+                System.out.println("No tickets available\n");
                 wait();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -48,7 +47,6 @@ public class TicketPool {
         }
         Ticket ticket = tickets.remove(0);
         notifyAll();
-        System.out.println("Number of Tickets in the pool: " + getCurrentSize() + "\n");
         return ticket;
     }
 

@@ -13,7 +13,7 @@ public class Customer implements Runnable {
     private final int totalTickets;
     private int ticketsAdded = 0;
 
-    public Customer(String customerName, int retrievalInterval, int totalTickets, TicketPool ticketPool) {
+    public Customer(String customerId, String customerName, int retrievalInterval, int totalTickets, TicketPool ticketPool) {
         this.customerName = customerName;
         this.customerId = UUID.randomUUID().toString();
         this.retrievalInterval = retrievalInterval;
@@ -24,18 +24,24 @@ public class Customer implements Runnable {
     public String getCustomerId(){
         return customerId;
     }
+    public String getCustomerName(){
+        return customerName;
+    }
     @Override
     public void run() {
         while (ticketsAdded < totalTickets) {
             Ticket ticket = ticketPool.buyTicket();
-            System.out.println("Ticket bought by " + customerId + "\n");
+            System.out.println("Ticket bought by " + customerName);
+            System.out.println(ticket);
             ticketsAdded++;
+            System.out.println(customerName + " bought "+ticketsAdded + " tickets\n");
             try {
                 Thread.sleep(retrievalInterval * 1000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        System.out.println("Customer " + customerName + " has finished buying tickets\n");
     }
 
 }
