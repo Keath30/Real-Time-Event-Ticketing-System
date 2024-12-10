@@ -1,0 +1,81 @@
+  .dashboard {
+    display: block;
+    padding: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    height: fit-content;
+    width: 500px;
+    max-height: 90%;
+    border: 2px solid #66FCF1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    color: white;
+  }
+
+  .dashboard-header {
+    margin-top: 0;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .status-message {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .status-text {
+    font-weight: bold;
+  }
+
+  .stopped {
+    color: red;
+  }
+
+  .not-started {
+    color: green;
+  }
+
+  .running {
+    color: green;
+  }
+
+  .availability-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .summary-item p {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .status-text {
+    font-weight: bold;
+  }
+
+  .status-text.not-started {
+    color: rgb(89, 216, 110);
+  }
+
+  .status-text.running {
+    color: green;
+  }
+
+  .status-text.stopped {
+    color: red;
+  }

@@ -1,0 +1,28 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #0B0C10; 
+    border: 2px solid #66FCF1;
+    border-radius: 8px;
+    color: white;
+    padding: 7px;
+    margin: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header-title {
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin: 5px;
+  }
+  
+  .status-bar {
+    font-size: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .status-text {
+    font-weight: bold;
+    color: #4caf50; 
+  }
