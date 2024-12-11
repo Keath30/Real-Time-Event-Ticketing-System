@@ -1,6 +1,5 @@
 package com.melissa.iit.cli.config;
 
-
 import com.melissa.iit.cli.util.LoggerUtil;
 
 import java.io.*;
@@ -20,14 +19,14 @@ public class ConfigurationManager {
      */
     public static void saveConfigurationToTextFile(Configuration config, String textFile) {
 
-        if(config==null || textFile==null || textFile.isEmpty()){
+        if (config == null || textFile == null || textFile.isEmpty()) {
             String errorMessage = "Invalid configuration or file";
             System.err.println(errorMessage);
-            LoggerUtil.log("ERROR",errorMessage);
+            LoggerUtil.log("ERROR", errorMessage);
             return;
         }
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(textFile))){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(textFile))) {
             oos.writeObject(config); // Serialize the configuration object and save to file
             System.out.println("Configuration saved to " + textFile);
             LoggerUtil.log("INFO", "Configuration saved to: " + textFile); //Log the save event
@@ -49,10 +48,10 @@ public class ConfigurationManager {
     public static Configuration loadConfiguration(String file) {
 
         //validate the file path
-        if(file == null || file.isEmpty()){
+        if (file == null || file.isEmpty()) {
             String errorMessage = "Invalid file";
             System.err.println(errorMessage);
-            LoggerUtil.log("ERROR",errorMessage);
+            LoggerUtil.log("ERROR", errorMessage);
             return null;
         }
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {

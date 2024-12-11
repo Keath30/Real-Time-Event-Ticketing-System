@@ -16,7 +16,6 @@ public class Customer implements Runnable {
     private final String customerName; // Name of the customer
     private final int ticketRetrievalRate; // Time interval between ticket purchases
     private final int totalTickets; // Total number of tickets the customer wants to buy
-    private int ticketsPurchased = 0; // Number of tickets the customer has bought
     private final TicketPool ticketPool;
 
 
@@ -45,24 +44,29 @@ public class Customer implements Runnable {
     @Override
     public void run() {
         try {
+            int ticketsPurchased = 0;
             // Loop until the customer has bought the specified number of tickets
             while (ticketsPurchased < totalTickets && !ticketPool.isStopRequested()) {
-
+                if(Thread.interrupted()){
+                    System.out.println(customerName + " has been interrupted and is stopping.");
+                    LoggerUtil.log("INFO", customerName + " has been interrupted and is stopping.");
+                    return;
+                }
                 // Attempt to buy a ticket from the ticket pool
                 Ticket ticket = ticketPool.buyTicket();
 
                 // Check if a ticket was successfully bought
                 if (ticket != null) {
-                    String logMessage = "Ticket bought by " + customerName + "(" + customerId+ ")"  + ticket;
+                    String logMessage = "Ticket bought by " + customerName + " (" + customerId+ ") "  + ticket;
                     System.out.println(logMessage);
                     LoggerUtil.log("INFO", logMessage);
 
                     ticketsPurchased++; // Increment the number of tickets the customer has bought
-                    System.out.println(customerName + " bought " + ticketsPurchased + " tickets");
-                    LoggerUtil.log("INFO", customerName + " bought " + ticketsPurchased + " tickets");
+                    String message = customerName + " bought " + ticketsPurchased + " tickets";
+                    System.out.println(message);
+                    LoggerUtil.log("INFO", message);
+                    Thread.sleep(ticketRetrievalRate * 1000L); // Wait before the next ticket purchase
                 }
-
-                Thread.sleep(ticketRetrievalRate * 1000L); // Wait before the next ticket purchase
             }
             System.out.println("Customer " + customerName + " has finished buying tickets");
             LoggerUtil.log("INFO", "Customer " + customerName + " has finished buying tickets");

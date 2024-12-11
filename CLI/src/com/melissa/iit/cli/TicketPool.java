@@ -4,8 +4,8 @@ import com.melissa.iit.cli.config.Configuration;
 import com.melissa.iit.cli.config.ConfigurationManager;
 import com.melissa.iit.cli.util.LoggerUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class TicketPool {
 
-    private final List<Ticket> tickets = Collections.synchronizedList(new LinkedList<>()); // Store tickets in a thread-safe list
+    private final List<Ticket> tickets = Collections.synchronizedList(new ArrayList<>()); // Store tickets in a thread-safe list
     private static int totalTicketsAdded = 0; //Total number of tickets added by vendors
     private static double totalSales = 0; // Total sales from tickets bought
     private int maxCapacity; //Maximum tickets allowed in pool
-    private volatile boolean stopRequested = false; //A flag indicating whether a stop has been requested for the ticket pool.
+    private boolean stopRequested = false; //A flag indicating whether a stop has been requested for the ticket pool.
 
     /**
      * Constructor for the TicketPool class.
@@ -47,7 +47,6 @@ public class TicketPool {
         stopRequested = true;
         notifyAll();
     }
-
 
     /**
      * Loads the maximum ticket capacity from the configuration file.
@@ -76,23 +75,17 @@ public class TicketPool {
      * @param ticket The ticket to be added to the pool.
      * @throws IllegalArgumentException if the ticket is null.
      */
-    public synchronized void addTickets(Ticket ticket) {
+    public synchronized void addTickets(Ticket ticket) throws InterruptedException {
 
         // Wait if the ticket pool is at full capacity
         while (tickets.size() >= maxCapacity && !isStopRequested()) {
-            try {
                 System.out.println("Ticket pool is full");
                 LoggerUtil.log("INFO", "Ticket pool is full");
                 wait(); // Wait for space to become available in the pool
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LoggerUtil.log("ERROR", "Thread interrupted while waiting to add ticket");
-            }
         }
         if (stopRequested) return;
         tickets.add(ticket); // Add the ticket to the pool
         totalTicketsAdded++; // Increment the total number of tickets added
-        System.out.println("Ticket added: " + ticket);
         notifyAll(); // Notify all threads waiting for tickets that one has been added
     }
 
@@ -103,17 +96,12 @@ public class TicketPool {
      *
      * @return The ticket that was bought.
      */
-    public synchronized Ticket buyTicket() {
+    public synchronized Ticket buyTicket() throws InterruptedException {
         // Wait if there are no tickets in the pool
         while (tickets.isEmpty() && !isStopRequested()) {
-            try {
-                System.out.println("No tickets available\n");
+                System.out.println("No tickets available");
                 LoggerUtil.log("INFO", "No tickets available");
                 wait(); // Wait until tickets are added to the pool
-            } catch (InterruptedException e) {
-               Thread.currentThread().interrupt();
-               LoggerUtil.log("ERROR","Thread interrupted while waiting to buy ticket");
-            }
         }
 
         if(stopRequested) return null;
@@ -121,10 +109,8 @@ public class TicketPool {
         Ticket ticket = tickets.remove(0);
 
         totalSales += ticket.getPrice(); // Add the price of the ticket to total sales
-        System.out.println("Ticket removed: " + ticket);
         notifyAll(); // Notify all threads waiting for tickets that one has been bought
         return ticket;
     }
-
 
 }

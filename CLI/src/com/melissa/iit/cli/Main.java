@@ -13,15 +13,21 @@ import java.util.UUID;
 
 /**
  * Main class for the Ticket Booking Application.
- * Handles the configuration setup, ticket management, and multiThreaded customer and vendor operations.
+ * Handles the configuration setup, ticket management, and multi-threaded customer and vendor operations.
  */
 public class Main {
     static Scanner scanner = new Scanner(System.in);
     private static final List<Thread> vendorThreads = new ArrayList<>();
     private static final List<Thread> customerThreads = new ArrayList<>();
-    private static boolean isRunning = false;
+    private volatile static boolean isRunning = false;
 
 
+    /**
+     * Main method to start and stop the ticket handling system.
+     * It presents options to the user for starting or stopping the ticket handling process.
+     *
+     * @param args Command-line arguments (not used).
+     */
     public static void main(String[] args) {
         TicketPool ticketPool = new TicketPool();
 
@@ -38,35 +44,41 @@ public class Main {
             String command = scanner.nextLine().trim();
 
             if (command.equalsIgnoreCase("start")) {
-                start();
+                start(ticketPool);
             } else if (command.equalsIgnoreCase("stop")) {
-                ticketPool.requestStop();
-                System.out.println("stopped");
+                stop(ticketPool);
                 break;
-                
-            }else {
+
+            } else {
                 System.out.println("Invalid Command.");
             }
         }
 
     }
 
-        public static void start(){
+    /**
+     * Starts the ticket handling system, which includes configuring the system,
+     * creating vendor and customer threads, and beginning ticket release and retrieval.
+     *
+     * @param ticketPool The ticket pool used to store and manage tickets.
+     */
+    public static void start(TicketPool ticketPool) {
 
-        if (isRunning){
+        if (isRunning) {
             System.out.println("Ticket handling system is already running");
+            return;
         }
-            int totalTickets = 0;
-            int maxTicketCapacity;
-            int quantity = 0;
-            int ticketReleaseRate = 0;
-            int ticketRetrievalRate = 0;
-            int vendorsCount;
-            int customersCount;
-            int ticketsPerRelease = 0;
-            double price = 0;
-            String eventName = "movie";
-            
+        int totalTickets = 0;
+        int maxTicketCapacity;
+        int quantity = 0;
+        int ticketReleaseRate = 0;
+        int ticketRetrievalRate = 0;
+        int vendorsCount;
+        int customersCount;
+        int ticketsPerRelease = 0;
+        double price = 0;
+        String eventName = "movie";
+
         // Prompting the user to choose between loading a configuration or entering a new one
         System.out.println("\nEnter\n1 - Load configuration from file\n2 - Enter new configuration");
 
@@ -91,7 +103,7 @@ public class Main {
 
         }
 
-        if(choice == 2) {
+        if (choice == 2) {
             // Collect user inputs for creating a new configuration
             totalTickets = inputValidation(scanner, "Enter the total number of tickets added by the vendor: ");
             maxTicketCapacity = inputValidation(scanner, "Enter the maximum ticket capacity: ");
@@ -108,20 +120,19 @@ public class Main {
         }
 
         // Prompt for the number of vendors and customers
-            ticketsPerRelease = inputValidation(scanner, "Enter the number of tickets per release: ");
-            price = inputValidation(scanner, "Enter the price of a ticket: ");
+        ticketsPerRelease = inputValidation(scanner, "Enter the number of tickets per release: ");
+        price = inputValidation(scanner, "Enter the price of a ticket: ");
         vendorsCount = inputValidation(scanner, "Enter the number of vendors: ");
         customersCount = inputValidation(scanner, "Enter the number of customers: ");
 
-        TicketPool ticketPool = new TicketPool();
-
+        isRunning = true;
         // Create and start vendor threads
         for (int i = 0; i < vendorsCount; i++) {
             String name = "Vendor " + i;
             String id = UUID.randomUUID().toString();
 
             // Vendors add tickets to the pool
-            Vendor vendor = new Vendor(id, name, eventName, ticketPool, ticketsPerRelease, ticketReleaseRate, totalTickets, price);
+            Vendor vendor = new Vendor(name, eventName, ticketPool, ticketsPerRelease, ticketReleaseRate, totalTickets, price);
             Thread vendorThread = new Thread(vendor);
             vendorThread.start();
             vendorThreads.add(vendorThread);
@@ -138,42 +149,11 @@ public class Main {
             customerThreads.add(customerThread);
         }
         isRunning = true;
-            System.out.println("Ticket handling system started");
-            LoggerUtil.log("INFO","Ticket handling system started");
+        System.out.println("Ticket handling system started");
+        LoggerUtil.log("INFO", "Ticket handling system started");
 
     }
 
-//    public static void stop(){
-//        if(!isRunning){
-//            System.out.println("Ticket handling system is not running");
-//            return;
-//        }
-//
-//        for(Thread thread: vendorThreads){
-//            thread.interrupt();
-//        }
-//
-//        for(Thread thread: customerThreads){
-//            thread.interrupt();
-//        }
-//        vendorThreads.clear();
-//        customerThreads.clear();
-//
-//        try{
-//            for(Thread thread: vendorThreads){
-//                thread.join();
-//            }
-//            for(Thread thread: customerThreads){
-//                thread.join();
-//            }
-//        }catch (InterruptedException e){
-//            System.out.println("Error while stopping threads");
-//        }
-//
-//        isRunning = false;
-//        System.out.println("Ticket handling system stopped");
-//        LoggerUtil.log("INFO", "Ticket handling system stopped");
-//    }
 
     /**
      * Validates integer input from the user.
@@ -208,18 +188,63 @@ public class Main {
      * @param scanner Scanner object for user input.
      * @return A valid choice (1 or 2).
      */
-    public static int inputTypeValidation(Scanner scanner){
-        while (!scanner.hasNextInt()){
+    public static int inputTypeValidation(Scanner scanner) {
+        while (!scanner.hasNextInt()) {
             System.out.println("Enter 1 or 2: ");
             scanner.next();
         }
         int choice = scanner.nextInt();
 
         // Recursive call for invalid choice
-        if (choice!=1 && choice!=2){
+        if (choice != 1 && choice != 2) {
             System.out.println("Invalid choice. Enter 1 or 2: ");
             return inputTypeValidation(scanner);
         }
         return choice;
+    }
+
+    /**
+     * Stops the ticket handling system, interrupting all vendor and customer threads,
+     * and waits for them to finish. Then, stops the ticket pool.
+     *
+     * @param ticketPool The ticket pool used to manage tickets.
+     */
+    public static void stop(TicketPool ticketPool) {
+        if (!isRunning) {
+            System.out.println("Ticket handling system is not running.");
+            return;
+        }
+
+        isRunning = false;  // Set the flag to false
+
+        // Interrupt all vendor and customer threads
+        for (Thread thread : vendorThreads) {
+            thread.interrupt();
+        }
+
+        for (Thread thread : customerThreads) {
+            thread.interrupt();
+        }
+
+        // Wait for all threads to finish by joining them
+        for (Thread thread : vendorThreads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        for (Thread thread : customerThreads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        ticketPool.requestStop();
+        System.out.println("Stopped ticket handling system");
+        LoggerUtil.log("INFO", "Stopped ticket handling system");
     }
 }

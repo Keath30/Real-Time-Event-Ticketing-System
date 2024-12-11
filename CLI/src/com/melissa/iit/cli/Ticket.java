@@ -24,25 +24,6 @@ public class Ticket {
     }
 
     /**
-     * Gets the unique ID of the ticket.
-     *
-     * @return the ticket ID
-     */
-    public int getTicketID() {
-        return ticketID;
-    }
-
-
-    /**
-     * Gets the name of the event for this ticket.
-     *
-     * @return the event name
-     */
-    public String getEventName() {
-        return eventName;
-    }
-
-    /**
      * Gets the price of the ticket.
      *
      * @return the price of the ticket
